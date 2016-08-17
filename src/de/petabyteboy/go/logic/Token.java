@@ -19,10 +19,6 @@ public class Token {
 		this.y = y;
 		this.player = player;
 	}
-	
-	public void destroy() {
-		Controller.getInstance().getGameBoard().getGrid()[x][y] = null;
-	}
 
 	public Player getPlayer() {
 		return player;
@@ -74,6 +70,10 @@ public class Token {
 
 	public int getY() {
 		return y;
+	}
+
+	public void destroy() {
+		group = null;
 	}
 
 }

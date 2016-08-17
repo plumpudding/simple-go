@@ -1,18 +1,18 @@
 package de.petabyteboy.go.logic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.petabyteboy.go.engine.graphics.Texture;
 
 public class Controller {
 
-	private GameBoard board = new GameBoard();
 	private int playerCount = 2;
 //	private int playerCount = 4;
 	private Player[] players = new Player[playerCount];
 	private int activePlayer = 0;
-	
-	public GameBoard getGameBoard() {
-		return board;
-	}
+	private int boardSize = 9;
+	private List<Token> newTokens = new ArrayList<Token>();
 	
 	private static Controller instance;
 	
@@ -48,29 +48,29 @@ public class Controller {
 	}
 	
 	public boolean placeToken(int x, int y) {
-
-		board.getGrid()[x][y] = new Token(x, y, players[activePlayer]);
-
+		
+		Token t = new Token(x, y, getActivePlayer());
+		newTokens.add(t);
+		
 		for (Player p : getOtherPlayers())
 			p.rebuildGroups();
-		
+
 		getActivePlayer().rebuildGroups();
 		
-		if (getTokenAt(x, y).getGroup() == null)
-			new Group(getTokenAt(x, y));
+		newTokens.remove(t);
 		
-		if (getTokenAt(x, y).getGroup().badMove /* || board.compareGrids() */) {
-			if (getTokenAt(x, y).getGroup().getSize() == 1)
-				getActivePlayer().removeGroupNow(board.getGrid()[x][y].getGroup());
+		if (t.getGroup() == null)
+			new Group(t, false);
+		System.out.println(t.getGroup());
+		
+		if (t.getGroup().badMove /* || board.compareGrids() */) {
+			if (t.getGroup().getSize() == 1)
+				t.getGroup().destroy(true);
 			else
-				getTokenAt(x, y).getGroup().removeToken(getTokenAt(x, y));
+				t.getGroup().removeToken(t);
 			
-			board.getGrid()[x][y] = null;
 			return false;
 		}
-		
-		board.genCurrentGrid();
-		board.saveCurrentGrid();
 		return true;
 	}
 	
@@ -89,10 +89,17 @@ public class Controller {
 	}
 	
 	public Token getTokenAt(int x, int y) {
-		if (x < 0 || y < 0 || x >= board.getSize() || y >= board.getSize())
-			return null;
+		for (Token t : newTokens)
+			if (t.getX() == x && t.getY() == y)
+				return t;
 		
-		return board.getGrid()[x][y];
+		for (Player p : players)
+			for (Group g : p.getGroups())
+				for (Token t : g.getTokens())
+					if (t.getX() == x && t.getY() == y)
+						return t;
+		
+		return null;
 	}
 
 	public Player getPlayerAt(int x, int y) {
@@ -121,6 +128,10 @@ public class Controller {
 	
 	public Player[] getPlayers() {
 		return players;
+	}
+
+	public int getBoardSize() {
+		return boardSize;
 	}
 	
 }

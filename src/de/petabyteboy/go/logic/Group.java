@@ -16,12 +16,13 @@ public class Group {
 	private Player player;
 	public boolean badMove = false;
 	
-	public Group(Token t) {
+	public Group(Token t, boolean b) {
 		player = t.getPlayer();
 		tokens.add(t);
 		t.setGroup(this);
 		
-		rebuild();
+		if (!b)
+			rebuild();
 		
 //		System.out.println("New group discovered. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
 		player.addGroup(this);
@@ -42,25 +43,27 @@ public class Group {
 		buildFreedoms();
 		
 		if (freedoms.size() == 0) {
-			this.destroy();
-//			System.out.println("Group destroyed!");
+			this.destroy(false);
 		} else {
 			badMove = false;
 //			System.out.println("Group updated. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
 		}
 	}
 	
-	public void destroy() {
-		if (this.player == Controller.getInstance().getActivePlayer()) {
+	public void destroy(boolean b) {
+		if (this.player == Controller.getInstance().getActivePlayer() && !b) {
 			System.out.println("bad move!");
 			badMove = true;
 			return;
 		}
+//		System.out.println("Group " + this + " destroyed!");
 		
-		this.setInactive();
-
+		this.setInactive(b);
+		
 		for (Token t : tokens)
 			t.destroy();
+		
+		tokens.clear();
 	}
 	
 	public void discoverNeighbours(Token t) {
@@ -72,16 +75,20 @@ public class Group {
 			Group otherGroup = token.getGroup();
 			
 			if (otherGroup != null)
-				otherGroup.setInactive();
+				otherGroup.setInactive(false);
 			
 			addToken(token);
 			discoverNeighbours(token);
 		}
 	}
 	
-	private void setInactive() {
+	private void setInactive(boolean b) {
 		inactive = true;
-		player.removeGroup(this);
+		
+		if (b)
+			player.removeGroupNow(this);
+		else
+			player.removeGroup(this);
 	}
 
 	public void addToken(Token t) {

@@ -58,7 +58,7 @@ public class Renderer {
 		int windowWidth = Game.getInstance().getWindowWidth();
 		int borderX = Game.getInstance().getBorderX();
 		int borderY = Game.getInstance().getBorderY();
-		boardSize = Controller.getInstance().getGameBoard().size;
+		boardSize = Controller.getInstance().getBoardSize();
 		
 		if (windowHeight > windowWidth) {
 			offsetX = ((float)(borderX) / windowWidth) * 2;
