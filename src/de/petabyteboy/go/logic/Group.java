@@ -9,30 +9,37 @@ import de.petabyteboy.go.Position;
 
 public class Group {
 
-	private List<Token> tokens = new ArrayList<Token>(); 
-	private List<Token> tokensToAdd = new ArrayList<Token>(); 
-	private Set<Position> freedoms = new HashSet<Position>();
-	private boolean inactive = false;
-	private Player player;
-	public boolean badMove = false;
+	private List<Token> tokens = new ArrayList<Token>();
+	private transient List<Token> tokensToAdd; 
+	private transient Set<Position> freedoms = new HashSet<Position>();
+	private transient boolean inactive;
+	private final int playerId;
+	public transient boolean badMove;
 	
 	public Group(Token t, boolean b) {
-		player = t.getPlayer();
+		playerId = Controller.getInstance().getGS().getPlayerNum(t.getPlayer());
+		getPlayer().addGroup(this);
 		tokens.add(t);
 		t.setGroup(this);
 		
 		if (!b)
 			rebuild();
 		
-//		System.out.println("New group discovered. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
-		player.addGroup(this);
+		System.out.println(System.currentTimeMillis() + " New group discovered. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
+	}
+	
+	public Player getPlayer() {
+		return Controller.getInstance().getGS().getPlayers()[playerId];
 	}
 	
 	public void rebuild() {
 		if (inactive)
 			return;
 		
-		tokensToAdd.clear();
+		if (tokensToAdd == null)
+			tokensToAdd = new ArrayList<Token>();
+		else
+			tokensToAdd.clear();
 		
 		for (Token t : tokens)
 			discoverNeighbours(t);
@@ -46,22 +53,19 @@ public class Group {
 			this.destroy(false);
 		} else {
 			badMove = false;
-//			System.out.println("Group updated. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
+			System.out.println(System.currentTimeMillis() +" Group updated. Size: " + tokens.size() + ". Freedoms: " + freedoms.size());
 		}
 	}
 	
 	public void destroy(boolean b) {
-		if (this.player == Controller.getInstance().getActivePlayer() && !b) {
+		System.out.println(System.currentTimeMillis() +" Group " + this + " destroyed!");
+		if (getPlayer() == Controller.getInstance().getGS().getActivePlayer() && !b) {
 			System.out.println("bad move!");
 			badMove = true;
 			return;
 		}
-//		System.out.println("Group " + this + " destroyed!");
 		
 		this.setInactive(b);
-		
-		for (Token t : tokens)
-			t.destroy();
 		
 		tokens.clear();
 	}
@@ -86,9 +90,9 @@ public class Group {
 		inactive = true;
 		
 		if (b)
-			player.removeGroupNow(this);
+			getPlayer().removeGroupNow(this);
 		else
-			player.removeGroup(this);
+			getPlayer().removeGroup(this);
 	}
 
 	public void addToken(Token t) {
@@ -97,7 +101,10 @@ public class Group {
 	}
 	
 	public void buildFreedoms() {
-		freedoms.clear();
+		if (freedoms == null)
+			freedoms = new HashSet<Position>();
+		else 
+			freedoms.clear();
 		
 		for (Token t : tokens) {
 			freedoms.addAll(t.getFreedoms());

@@ -58,7 +58,7 @@ public class Renderer {
 		int windowWidth = Game.getInstance().getWindowWidth();
 		int borderX = Game.getInstance().getBorderX();
 		int borderY = Game.getInstance().getBorderY();
-		boardSize = Controller.getInstance().getBoardSize();
+		boardSize = Controller.getInstance().getGS().getBoardSize();
 		
 		if (windowHeight > windowWidth) {
 			offsetX = ((float)(borderX) / windowWidth) * 2;
@@ -87,7 +87,7 @@ public class Renderer {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glColor3f(1f, 1f, 1f);
 		
-		for (Player p : Controller.getInstance().getPlayers())
+		for (Player p : Controller.getInstance().getGS().getPlayers())
 			for (Group g : p.getGroups())
 				for (Token token : g.getTokens())
 					if (token != null)

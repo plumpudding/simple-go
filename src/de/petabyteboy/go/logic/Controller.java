@@ -3,16 +3,11 @@ package de.petabyteboy.go.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.petabyteboy.go.engine.graphics.Texture;
-
 public class Controller {
 
-	private int playerCount = 2;
-//	private int playerCount = 4;
-	private Player[] players = new Player[playerCount];
-	private int activePlayer = 0;
-	private int boardSize = 9;
 	private List<Token> newTokens = new ArrayList<Token>();
+	private GameState gs;
+	private TimeMachine ts = new TimeMachine();
 	
 	private static Controller instance;
 	
@@ -27,65 +22,43 @@ public class Controller {
 	}
 	
 	public void init() {
-		players[0] = new Player(new Texture("res/black.png"));
-		players[1] = new Player(new Texture("res/white.png"));
-//		players[2] = new Player(new Texture("res/3.png"));
-//		players[3] = new Player(new Texture("res/4.png"));
-	}
-	
-	private void nextPlayer() {
-		activePlayer++;
-		
-		if (activePlayer == playerCount)
-			activePlayer = 0;
+		gs = new GameState(2, 9);
 	}
 
 	public void mouseClick(int x, int y) {
 		if (getTokenAt(x, y) == null) {
-			if (placeToken(x, y))
-				nextPlayer();
+			if (placeToken(x, y)) {
+
+				ts.saveCurrentState();
+				System.out.println(ts.getCurrentState());
+
+			} else {
+				ts.restoreState(0);
+			}
+			gs.nextPlayer();
 		}
 	}
 	
 	public boolean placeToken(int x, int y) {
 		
-		Token t = new Token(x, y, getActivePlayer());
+		Token t = new Token(x, y, gs.getActivePlayer());
 		newTokens.add(t);
 		
-		for (Player p : getOtherPlayers())
+		for (Player p : gs.getOtherPlayers())
 			p.rebuildGroups();
 
-		getActivePlayer().rebuildGroups();
+		gs.getActivePlayer().rebuildGroups();
 		
 		newTokens.remove(t);
 		
 		if (t.getGroup() == null)
 			new Group(t, false);
-		System.out.println(t.getGroup());
 		
-		if (t.getGroup().badMove /* || board.compareGrids() */) {
-			if (t.getGroup().getSize() == 1)
-				t.getGroup().destroy(true);
-			else
-				t.getGroup().removeToken(t);
-			
+		if (t.getGroup().badMove || !ts.isMoveValid()) {
 			return false;
 		}
+		
 		return true;
-	}
-	
-	private Player[] getOtherPlayers() {
-		Player[] otherPlayers = new Player[playerCount-1];
-		
-		int i = 0;
-		for (Player p : players) {
-			if (p != getActivePlayer()) {
-				otherPlayers[i] = p;
-				i++;
-			}
-		}
-		
-		return otherPlayers;
 	}
 	
 	public Token getTokenAt(int x, int y) {
@@ -93,7 +66,7 @@ public class Controller {
 			if (t.getX() == x && t.getY() == y)
 				return t;
 		
-		for (Player p : players)
+		for (Player p : gs.getPlayers())
 			for (Group g : p.getGroups())
 				for (Token t : g.getTokens())
 					if (t.getX() == x && t.getY() == y)
@@ -111,27 +84,16 @@ public class Controller {
 		return token.getPlayer();
 	}
 	
-	public Player getActivePlayer() {
-		return players[activePlayer];
-	}
-
-	public int getPlayerNum(Player player) {
-		if (player == null)
-			return -1;
-		
-		for (int i = 0; i < players.length; i++)
-			if (players[i] == player)
-				return i;
-		
-		return -1;
+	public GameState getGS() {
+		return gs;
 	}
 	
-	public Player[] getPlayers() {
-		return players;
+	public void setGS(GameState gs) {
+		this.gs = gs;
 	}
 
-	public int getBoardSize() {
-		return boardSize;
+	public void saveState() {
+		
 	}
 	
 }

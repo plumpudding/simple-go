@@ -8,12 +8,13 @@ import de.petabyteboy.go.engine.graphics.Texture;
 public class Player {
 	
 	private int score;
-	private Texture texture;
+	private String texturePath;
+	private transient Texture texture;
 	private List<Group> groups = new ArrayList<Group>();
-	private List<Group> groupsToRemove = new ArrayList<Group>();
+	private transient List<Group> groupsToRemove;
 	
-	public Player(Texture texture) {
-		this.texture = texture;
+	public Player(String texturePath) {
+		this.texturePath = texturePath;
 	}
 	
 	public int getScore() {
@@ -21,7 +22,10 @@ public class Player {
 	}
 	
 	public void rebuildGroups() {
-		groupsToRemove.clear();
+		if (groupsToRemove == null)
+			groupsToRemove = new ArrayList<Group>();
+		else
+			groupsToRemove.clear();
 		
 		for (Group g : groups)
 			g.rebuild();
@@ -43,6 +47,9 @@ public class Player {
 	}
 
 	public Texture getTexture() {
+		if (texture == null)
+			texture = new Texture(texturePath);
+		
 		return texture;
 	}
 	

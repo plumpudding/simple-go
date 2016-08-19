@@ -15,7 +15,7 @@ public class Position {
 	private static Position[][] instances;
 	
 	public static Position getInstance(int x, int y) {
-		int boardSize = Controller.getInstance().getBoardSize();
+		int boardSize = Controller.getInstance().getGS().getBoardSize();
 		
 		if (x < 0 || y < 0 || x >= boardSize || y >= boardSize)
 			return null;

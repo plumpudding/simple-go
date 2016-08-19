@@ -11,40 +11,43 @@ public class Token {
 	
 	private final int x;
 	private final int y;
-	private final Player player;
-	private Group group;
+	private final int playerId;
+	private int groupId = -1;
 	
 	public Token(int x, int y, Player player) {
 		this.x = x;
 		this.y = y;
-		this.player = player;
+		this.playerId = Controller.getInstance().getGS().getPlayerNum(player);
 	}
 
 	public Player getPlayer() {
-		return player;
+		return Controller.getInstance().getGS().getPlayers()[playerId];
 	}
 	
 	public List<Token> getNeighbours() {
 		List<Token> neighbours = new ArrayList<Token>();
 
-		if (Controller.getInstance().getPlayerAt(x - 1, y) == player)
+		if (Controller.getInstance().getPlayerAt(x - 1, y) == getPlayer())
 			neighbours.add(Controller.getInstance().getTokenAt(x - 1, y));
-		if (Controller.getInstance().getPlayerAt(x + 1, y) == player)
+		if (Controller.getInstance().getPlayerAt(x + 1, y) == getPlayer())
 			neighbours.add(Controller.getInstance().getTokenAt(x + 1, y));
-		if (Controller.getInstance().getPlayerAt(x, y - 1) == player)
+		if (Controller.getInstance().getPlayerAt(x, y - 1) == getPlayer())
 			neighbours.add(Controller.getInstance().getTokenAt(x, y - 1));
-		if (Controller.getInstance().getPlayerAt(x, y + 1) == player)
+		if (Controller.getInstance().getPlayerAt(x, y + 1) == getPlayer())
 			neighbours.add(Controller.getInstance().getTokenAt(x, y + 1));
 		
 		return neighbours;
 	}
 
 	public Group getGroup() {
-		return group;
+		if (groupId >=0 && getPlayer().getGroups().size() > groupId)
+			return getPlayer().getGroups().get(groupId);
+		
+		return null;
 	}
 
 	public void setGroup(Group group) {
-		this.group = group;
+		groupId = getPlayer().getGroups().indexOf(group);
 	}
 	
 	public Set<Position> getFreedoms() {
@@ -70,10 +73,6 @@ public class Token {
 
 	public int getY() {
 		return y;
-	}
-
-	public void destroy() {
-		group = null;
 	}
 
 }

@@ -24,7 +24,7 @@ public class Input {
 
 		int borderX = Game.getInstance().getBorderX();
 		int borderY = Game.getInstance().getBorderY();
-		int boardSize = Controller.getInstance().getBoardSize();
+		int boardSize = Controller.getInstance().getGS().getBoardSize();
 		
 		DoubleBuffer xPos = BufferUtils.createDoubleBuffer(1);
 		DoubleBuffer yPos = BufferUtils.createDoubleBuffer(1);
