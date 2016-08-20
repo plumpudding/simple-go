@@ -3,11 +3,17 @@ package de.petabyteboy.go.logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.turbomanage.httpclient.BasicHttpClient;
+import com.turbomanage.httpclient.HttpResponse;
+import com.turbomanage.httpclient.ParameterMap;
+
 public class Controller {
 
 	private List<Token> newTokens = new ArrayList<Token>();
 	private GameState gs;
-	private TimeMachine ts = new TimeMachine();
+	private Gson gson = new Gson();
+	private String clientId = String.valueOf(Math.random() * 1000);
 	
 	private static Controller instance;
 	
@@ -26,17 +32,37 @@ public class Controller {
 	}
 
 	public void mouseClick(int x, int y) {
-		if (getTokenAt(x, y) == null) {
-			if (placeToken(x, y)) {
+//		if (getTokenAt(x, y) == null) {
+//			if (placeToken(x, y)) {
+//
+//				ts.saveCurrentState();
+//				System.out.println(ts.getCurrentState());
+//
+//			} else {
+//				ts.restoreState(0);
+//			}
+//			gs.nextPlayer();
+//		}
 
-				ts.saveCurrentState();
-				System.out.println(ts.getCurrentState());
+		String url = "http://localhost:4000";
+		BasicHttpClient client = new BasicHttpClient(url);
+		client.setConnectionTimeout(2000);
+		ParameterMap params = client.newParams().add("x", String.valueOf(x)).add("y", String.valueOf(y)).add("player", String.valueOf(gs.activePlayer)).add("clientId", clientId);
+		HttpResponse response = client.get("/placeToken", params);
+		String state = response.getBodyAsString();
+		restoreState(state);
+		
+//		try {
+//			URLConnection connection = new URL(url + "placeToken?x="+x+"&y="+y+"&p="+gs.activePlayer).openConnection();
+//			connection.setRequestProperty("Accept-Charset", "UTF-8");
+//			InputStream response = connection.getInputStream();
+//			state = response.toString();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-			} else {
-				ts.restoreState(0);
-			}
-			gs.nextPlayer();
-		}
+		System.out.println(state);
+		
 	}
 	
 	public boolean placeToken(int x, int y) {
@@ -53,10 +79,6 @@ public class Controller {
 		
 		if (t.getGroup() == null)
 			new Group(t, false);
-		
-		if (t.getGroup().badMove || !ts.isMoveValid()) {
-			return false;
-		}
 		
 		return true;
 	}
@@ -91,9 +113,9 @@ public class Controller {
 	public void setGS(GameState gs) {
 		this.gs = gs;
 	}
-
-	public void saveState() {
-		
+	
+	public void restoreState(String state) {
+		Controller.getInstance().setGS(gson.fromJson(state, GameState.class));
 	}
 	
 }

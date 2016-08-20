@@ -102,7 +102,7 @@ public class Texture {
         stbi_set_flip_vertically_on_load(true);
         ByteBuffer data = stbi_load(path, w, h, comp, 4);
         if (data == null) {
-            throw new RuntimeException("Failed to load a texture file!"
+            throw new RuntimeException("Failed to load a texture file " + path + "!"
                                        + System.lineSeparator() + stbi_failure_reason());
         }
 

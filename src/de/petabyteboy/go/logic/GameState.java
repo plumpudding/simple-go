@@ -5,7 +5,7 @@ public class GameState {
 	private int playerCount;
 	private int boardSize;
 	private Player[] players;
-	private int activePlayer = 0;
+	int activePlayer = 0;
 
 	public GameState(int playerCount, int boardSize) {
 		this.playerCount = playerCount;

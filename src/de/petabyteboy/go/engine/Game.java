@@ -76,7 +76,6 @@ public class Game {
 
 		GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
 			if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE) {
-				Controller.getInstance().saveState();
 				GLFW.glfwSetWindowShouldClose(window, true);
 			}
 		});
